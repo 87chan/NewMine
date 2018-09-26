@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class GameMain : MonoBehaviour {
 
+    const int TILE_SIZE = 32;
+
+    public Tile tile;
+
     public Sprite sprite_field;
     public Sprite sprite_legend;
     public Sprite sprite_beast;
@@ -17,13 +21,48 @@ public class GameMain : MonoBehaviour {
     public Sprite sprite_footprint_l;
     public Sprite sprite_footprint_ul;
 
+    public int width;
+    public int height;
+
+    Tile[,] tiles;
+
     // Use this for initialization
-    void Start () {
-		
-	}
+    void Start()
+    {
+        tiles = new Tile[width, height];
+
+        for (int j = 0; j < height; ++j)
+        {
+            for (int i = 0; i < width; ++i)
+            {
+                Vector3 spawn_pos = new Vector3(i * TILE_SIZE, -(j * TILE_SIZE), 0.0f);
+                Tile newTile = Instantiate(tile, spawn_pos, Quaternion.identity);
+                Canvas canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
+                newTile.transform.SetParent(canvas.transform, false);
+
+                SpriteRenderer sprite = newTile.transform.FindChild("Object").GetComponent<SpriteRenderer>();
+                sprite.sprite = sprite_beast;
+
+                tiles[i, j] = newTile;
+            }
+        }
+
+        for (int j = 0; j < height; ++j)
+        {
+            if (j < 2)
+            {
+                for (int i = 0; i < width; ++i)
+                {
+                    SpriteRenderer sprite = tiles[i, j].transform.FindChild("Object").GetComponent<SpriteRenderer>();
+                    sprite.sprite = sprite_legend;
+                }
+            }
+        }
+    }
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+    {
 		
 	}
 }
