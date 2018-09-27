@@ -39,9 +39,7 @@ public class GameMain : MonoBehaviour {
                 Tile newTile = Instantiate(tile, spawn_pos, Quaternion.identity);
                 Canvas canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
                 newTile.transform.SetParent(canvas.transform, false);
-
-                SpriteRenderer sprite = newTile.transform.FindChild("Object").GetComponent<SpriteRenderer>();
-                sprite.sprite = sprite_beast;
+                newTile.SetSprite(Tile.TileType.Beast);
 
                 tiles[i, j] = newTile;
             }
@@ -53,8 +51,7 @@ public class GameMain : MonoBehaviour {
             {
                 for (int i = 0; i < width; ++i)
                 {
-                    SpriteRenderer sprite = tiles[i, j].transform.FindChild("Object").GetComponent<SpriteRenderer>();
-                    sprite.sprite = sprite_legend;
+                    tiles[i, j].SetSprite(Tile.TileType.Legend);
                 }
             }
         }
