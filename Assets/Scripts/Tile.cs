@@ -77,4 +77,9 @@ public class Tile : MonoBehaviour {
         }
         sprite.sprite = new_sprite;
     }
+
+    public void OnClick()
+    {
+        Debug.Log("クリック");
+    }
 }
