@@ -39,20 +39,9 @@ public class GameMain : MonoBehaviour {
                 Tile newTile = Instantiate(tile, spawn_pos, Quaternion.identity);
                 Canvas canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
                 newTile.transform.SetParent(canvas.transform, false);
-                newTile.SetSprite(Tile.TileType.Beast);
+                newTile.SetObject(Tile.TileType.Beast);
 
                 tiles[i, j] = newTile;
-            }
-        }
-
-        for (int j = 0; j < height; ++j)
-        {
-            if (j < 2)
-            {
-                for (int i = 0; i < width; ++i)
-                {
-                    tiles[i, j].SetSprite(Tile.TileType.Legend);
-                }
             }
         }
     }

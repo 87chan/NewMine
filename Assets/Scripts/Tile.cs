@@ -20,17 +20,27 @@ public class Tile : MonoBehaviour {
         Footprint_UL,
     }
 
+    TileType tile_type;
+    bool is_open = false;
+
     // Use this for initialization
-    void Start () {
-		
+    void Start ()
+    {
+        SetSprite(TileType.Grass);
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+    {
 		
 	}
 
-    public void SetSprite(TileType type)
+    public void SetObject(TileType type)
+    {
+        tile_type = type;
+    }
+
+    void SetSprite(TileType type)
     {
         GameMain game_main = GameObject.Find("GameMain").GetComponent<GameMain>();
         SpriteRenderer sprite = transform.FindChild("Object").GetComponent<SpriteRenderer>();
@@ -80,6 +90,11 @@ public class Tile : MonoBehaviour {
 
     public void OnClick()
     {
-        Debug.Log("クリック");
+        if (!is_open)
+        {
+            is_open = true;
+
+            SetSprite(tile_type);
+        }
     }
 }
