@@ -31,12 +31,14 @@ public class GameMain : MonoBehaviour {
     {
         tiles = new Tile[width, height];
 
+        Vector3 offset = new Vector3(((width * TILE_SIZE) * -0.5f) + (TILE_SIZE * 0.5f), ((height * TILE_SIZE) * 0.5f) + (TILE_SIZE * -0.5f));
+
         for (int j = 0; j < height; ++j)
         {
             for (int i = 0; i < width; ++i)
             {
                 Vector3 spawn_pos = new Vector3(i * TILE_SIZE, -(j * TILE_SIZE), 0.0f);
-                Tile newTile = Instantiate(tile, spawn_pos, Quaternion.identity);
+                Tile newTile = Instantiate(tile, spawn_pos + offset, Quaternion.identity);
                 Canvas canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
                 newTile.transform.SetParent(canvas.transform, false);
                 newTile.SetObject(Tile.TileType.Beast);
