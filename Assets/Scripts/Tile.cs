@@ -90,11 +90,28 @@ public class Tile : MonoBehaviour {
 
     public void OnClick()
     {
-        if (!is_open)
+        GameMain game_main = GameObject.Find("GameMain").GetComponent<GameMain>();
+
+        if (!game_main.is_game_over
+            && !game_main.is_game_clear
+            && !is_open)
         {
             is_open = true;
 
             SetSprite(tile_type);
+
+            switch(tile_type)
+            {
+                case TileType.Legend:
+                    game_main.is_game_clear = true;
+                    break;
+                case TileType.Beast:
+                    game_main.is_game_over = true;
+                    break;
+                default:
+                    break;
+
+            }
         }
     }
 }

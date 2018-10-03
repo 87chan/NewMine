@@ -24,6 +24,9 @@ public class GameMain : MonoBehaviour {
     public int width;
     public int height;
 
+    public bool is_game_over;
+    public bool is_game_clear;
+
     Tile[,] tiles;
 
     // Use this for initialization
@@ -41,7 +44,7 @@ public class GameMain : MonoBehaviour {
                 Tile newTile = Instantiate(tile, spawn_pos + offset, Quaternion.identity);
                 Canvas canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
                 newTile.transform.SetParent(canvas.transform, false);
-                newTile.SetObject(Tile.TileType.Beast);
+                newTile.SetObject(Tile.TileType.Legend);
 
                 tiles[i, j] = newTile;
             }
