@@ -26,8 +26,13 @@ public class Tile : MonoBehaviour {
     // Use this for initialization
     void Start ()
     {
-        SetSprite(TileType.Grass);
-	}
+        GameMain game_main = GameObject.Find("GameMain").GetComponent<GameMain>();
+
+        if (!game_main.is_full_view)
+        {
+            SetSprite(TileType.Grass);
+        }
+    }
 	
 	// Update is called once per frame
 	void Update ()
@@ -37,7 +42,14 @@ public class Tile : MonoBehaviour {
 
     public void SetObject(TileType type)
     {
+        GameMain game_main = GameObject.Find("GameMain").GetComponent<GameMain>();
+
         tile_type = type;
+
+        if (game_main.is_full_view)
+        {
+            SetSprite(tile_type);
+        }
     }
 
     void SetSprite(TileType type)

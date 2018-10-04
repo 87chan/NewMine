@@ -21,6 +21,8 @@ public class GameMain : MonoBehaviour {
     public Sprite sprite_footprint_l;
     public Sprite sprite_footprint_ul;
 
+    public bool is_full_view;
+
     public int width;
     public int height;
 
