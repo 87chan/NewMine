@@ -6,6 +6,8 @@ public class Tile : MonoBehaviour {
 
     public enum TileType
     {
+        None,
+
         Field,
         Legend,
         Beast,
@@ -22,6 +24,8 @@ public class Tile : MonoBehaviour {
 
     TileType tile_type;
     bool is_open = false;
+
+    public bool IsEmptyObject() { return (tile_type == TileType.None); }
 
     // Use this for initialization
     void Start ()

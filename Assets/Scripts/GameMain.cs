@@ -5,6 +5,7 @@ using UnityEngine;
 public class GameMain : MonoBehaviour {
 
     const int TILE_SIZE = 32;
+    const int LEGEND_PLACEMENT_NUM = 1;
 
     public Tile tile;
 
@@ -26,6 +27,10 @@ public class GameMain : MonoBehaviour {
     public int width;
     public int height;
 
+    public int beast_placement_num;
+    public int beast_extend_num;
+    public int legend_extend_num;
+
     public bool is_game_over;
     public bool is_game_clear;
 
@@ -34,8 +39,24 @@ public class GameMain : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
+        // 周囲マスの数（レアを除く）以上は設定しないように
+        Debug.Assert(beast_placement_num <= (width * 2 + (height - 2) * 2) - 1, "猛獣の配置数が多すぎます");
+
         tiles = new Tile[width, height];
 
+        InitializeTiles();
+
+        PlacementBeasts();
+        PlacementLegend();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+    }
+
+    void InitializeTiles()
+    {
         Vector3 offset = new Vector3(((width * TILE_SIZE) * -0.5f) + (TILE_SIZE * 0.5f), ((height * TILE_SIZE) * 0.5f) + (TILE_SIZE * -0.5f));
 
         for (int j = 0; j < height; ++j)
@@ -46,15 +67,45 @@ public class GameMain : MonoBehaviour {
                 Tile newTile = Instantiate(tile, spawn_pos + offset, Quaternion.identity);
                 Canvas canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
                 newTile.transform.SetParent(canvas.transform, false);
-                newTile.SetObject(Tile.TileType.Legend);
-
                 tiles[i, j] = newTile;
             }
         }
     }
-	
-	// Update is called once per frame
-	void Update ()
+
+    void PlacementAround(Tile.TileType type)
     {
+        int x = 0;
+        int y = 0;
+
+        // 周囲の空きマスを探索
+        bool is_found = false;
+        while (!is_found)
+        {
+            x = Random.Range(0, width);
+            y = Random.Range(0, height);
+
+            if (((x == 0 || x == width - 1) || (y == 0 || y == height - 1))
+                && tiles[x, y].IsEmptyObject())
+            {
+                is_found = true;
+            }
+        }
+
+        // タイプを指定
+        Tile tile = tiles[x, y];
+        tile.SetObject(type);
+    }
+
+    void PlacementBeasts()
+    {
+        for (int i = 0; i < beast_placement_num; ++i)
+        {
+            PlacementAround(Tile.TileType.Beast);
+        }
+    }
+
+    void PlacementLegend()
+    {
+        PlacementAround(Tile.TileType.Legend);
     }
 }
