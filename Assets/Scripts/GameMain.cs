@@ -7,7 +7,8 @@ public class GameMain : MonoBehaviour {
     const int TILE_SIZE = 32;
     const int LEGEND_PLACEMENT_NUM = 1;
 
-    public Tile tile;
+    public Tile tile_ref;
+    public Animal animal_ref;
 
     public Sprite sprite_field;
     public Sprite sprite_legend;
@@ -28,13 +29,17 @@ public class GameMain : MonoBehaviour {
     public int height;
 
     public int beast_placement_num;
-    public int beast_extend_num;
-    public int legend_extend_num;
+    public int beast_extend_min_num;
+    public int beast_extend_max_num;
+    public int legend_extend_min_num;
+    public int legend_extend_max_num;
 
     public bool is_game_over;
     public bool is_game_clear;
 
     Tile[,] tiles;
+    Animal legend;
+    Animal[] beasts;
 
     // Use this for initialization
     void Start()
@@ -43,16 +48,37 @@ public class GameMain : MonoBehaviour {
         Debug.Assert(beast_placement_num <= (width * 2 + (height - 2) * 2) - 1, "猛獣の配置数が多すぎます");
 
         tiles = new Tile[width, height];
+        beasts = new Animal[beast_placement_num];
+        legend = new Animal();
 
         InitializeTiles();
+        InitializeAnimals();
 
         PlacementBeasts();
+        ExtendBeasts();
+
         PlacementLegend();
+        ExtendLegend();
     }
 
     // Update is called once per frame
     void Update()
     {
+    }
+
+    bool CheckExtensible(int x, int y)
+    {
+        // 範囲以内で空の場所
+        if ((0 <= x && x < width)
+            && (0 <= y && y < height))
+        {
+            if (tiles[x, y].IsEmptyObject())
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     void InitializeTiles()
@@ -64,7 +90,7 @@ public class GameMain : MonoBehaviour {
             for (int i = 0; i < width; ++i)
             {
                 Vector3 spawn_pos = new Vector3(i * TILE_SIZE, -(j * TILE_SIZE), 0.0f);
-                Tile newTile = Instantiate(tile, spawn_pos + offset, Quaternion.identity);
+                Tile newTile = Instantiate(tile_ref, spawn_pos + offset, Quaternion.identity);
                 Canvas canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
                 newTile.transform.SetParent(canvas.transform, false);
                 tiles[i, j] = newTile;
@@ -72,14 +98,23 @@ public class GameMain : MonoBehaviour {
         }
     }
 
-    void PlacementAround(Tile.TileType type)
+    void InitializeAnimals()
+    {
+        legend = Instantiate(animal_ref, new Vector3(), Quaternion.identity);
+
+        for (int i = 0; i < beast_placement_num; ++i)
+        {
+            beasts[i] = Instantiate(animal_ref, new Vector3(), Quaternion.identity);
+        }
+    }
+
+    void PlacementAround(TileType type, int index = 0)
     {
         int x = 0;
         int y = 0;
 
         // 周囲の空きマスを探索
-        bool is_found = false;
-        while (!is_found)
+        while (true)
         {
             x = Random.Range(0, width);
             y = Random.Range(0, height);
@@ -87,25 +122,125 @@ public class GameMain : MonoBehaviour {
             if (((x == 0 || x == width - 1) || (y == 0 || y == height - 1))
                 && tiles[x, y].IsEmptyObject())
             {
-                is_found = true;
+                break;
             }
         }
 
         // タイプを指定
         Tile tile = tiles[x, y];
         tile.SetObject(type);
+        int extend_num = 0;
+
+        switch (type)
+        {
+            case TileType.Legend:
+                legend.SetAnimalType(type);
+                legend.SetCurrentPos(new Vector2(x, y));
+
+                extend_num = Random.Range(legend_extend_min_num, legend_extend_max_num + 1);
+                legend.InitializeExtendNum(extend_num);
+                break;
+
+            case TileType.Beast:
+                Animal beast = beasts[index];
+                beast.SetAnimalType(type);
+                beast.SetCurrentPos(new Vector2(x, y));
+
+                extend_num = Random.Range(beast_extend_min_num, beast_extend_max_num + 1);
+                beast.InitializeExtendNum(extend_num);
+                break;
+
+            default:
+                break;
+        }
     }
 
     void PlacementBeasts()
     {
         for (int i = 0; i < beast_placement_num; ++i)
         {
-            PlacementAround(Tile.TileType.Beast);
+            PlacementAround(TileType.Beast, i);
         }
     }
 
     void PlacementLegend()
     {
-        PlacementAround(Tile.TileType.Legend);
+        PlacementAround(TileType.Legend);
+    }
+
+    bool CheckCompleteExtendBeasts()
+    {
+        for (int i = 0; i < beast_placement_num; ++i)
+        {
+            Animal beast = beasts[i];
+            if (!beast.GetIsCompleteExtend())
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    void ExtendOneStep(Animal animal, int new_x, int new_y)
+    {
+        int x = (int)animal.GetCurrentPos().x;
+        int y = (int)animal.GetCurrentPos().y;
+
+        DirectionType new_direction = Utility.ConvertToDirectionType(new Vector2(new_x - x, new_y - y));
+        animal.SetDirectionType(new_direction);
+
+        // 前回位置に足跡を設定
+        Tile tile = tiles[x, y];
+        tile.SetObject((TileType)((int)TileType.Footprint_U + new_direction));
+
+        // 新しい位置の設定
+        tile = tiles[new_x, new_y];
+        tile.SetObject(animal.GetAnimalType());
+        animal.SetCurrentPos(new Vector2(new_x, new_y));
+
+        animal.DecreaseLeftExtendNum();
+    }
+
+    void ExtendBeastsOneStep()
+    {
+        for (int i = 0; i < beast_placement_num; ++i)
+        {
+            Animal beast = beasts[i];
+            if(beast.GetIsCompleteExtend())
+            {
+                break;
+            }
+
+            Vector2 new_pos = new Vector2();
+            while (true)
+            {
+                Vector2 direction_vector = Utility.ConvertToDirectionVector(Utility.GetRandomDirectionType());
+                new_pos = beast.GetCurrentPos() + direction_vector;
+                if (CheckExtensible((int)new_pos.x, (int)new_pos.y))
+                {
+                    break;
+                }
+            }
+
+            ExtendOneStep(beast, (int)new_pos.x, (int)new_pos.y);
+        }
+    }
+
+    void ExtendBeasts()
+    {
+        while(true)
+        {
+            ExtendBeastsOneStep();
+
+            if (CheckCompleteExtendBeasts())
+            {
+                break;
+            }
+        }
+    }
+
+    void ExtendLegend()
+    {
     }
 }

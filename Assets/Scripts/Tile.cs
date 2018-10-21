@@ -4,25 +4,7 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour {
 
-    public enum TileType
-    {
-        None,
-
-        Field,
-        Legend,
-        Beast,
-        Grass,
-        Footprint_U,
-        Footprint_UR,
-        Footprint_R,
-        Footprint_DR,
-        Footprint_D,
-        Footprint_DL,
-        Footprint_L,
-        Footprint_UL,
-    }
-
-    TileType tile_type;
+    TileType tile_type = TileType.None;
     bool is_open = false;
 
     public bool IsEmptyObject() { return (tile_type == TileType.None); }
