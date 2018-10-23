@@ -66,6 +66,21 @@ public class GameMain : MonoBehaviour {
     {
     }
 
+    bool CheckAroundExtensible(int x, int y)
+    {
+        for (int i = 0; i < 8; ++i)
+        {
+            Vector2 pos = new Vector2(x, y);
+            pos += Utility.ConvertToDirectionVector((DirectionType)(i + (int)DirectionType.U));
+            if(CheckExtensible((int)pos.x, (int)pos.y))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     bool CheckExtensible(int x, int y)
     {
         // 範囲以内で空の場所
@@ -93,6 +108,7 @@ public class GameMain : MonoBehaviour {
                 Tile newTile = Instantiate(tile_ref, spawn_pos + offset, Quaternion.identity);
                 Canvas canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
                 newTile.transform.SetParent(canvas.transform, false);
+                newTile.SetIndexes(i, j);
                 tiles[i, j] = newTile;
             }
         }
@@ -202,6 +218,36 @@ public class GameMain : MonoBehaviour {
         animal.DecreaseLeftExtendNum();
     }
 
+    Vector2 GetRandomExtensiblePos(Vector2 current_pos)
+    {
+        Vector2 new_pos = new Vector2();
+        while (true)
+        {
+            Vector2 direction_vector = Utility.ConvertToDirectionVector(Utility.GetRandomDirectionType());
+            new_pos = current_pos + direction_vector;
+            if (CheckExtensible((int)new_pos.x, (int)new_pos.y))
+            {
+                break;
+            }
+        }
+
+        return new_pos;
+    }
+
+    void ExtendLegendOneStep()
+    {
+        if (CheckAroundExtensible((int)legend.GetCurrentPos().x, (int)legend.GetCurrentPos().y))
+        {
+            Vector2 new_pos = GetRandomExtensiblePos(legend.GetCurrentPos());
+            ExtendOneStep(legend, (int)new_pos.x, (int)new_pos.y);
+        }
+        else
+        {
+            // 行き場が無い場合は終了
+            legend.ForceCompleteExtend();
+        }
+    }
+
     void ExtendBeastsOneStep()
     {
         for (int i = 0; i < beast_placement_num; ++i)
@@ -209,21 +255,19 @@ public class GameMain : MonoBehaviour {
             Animal beast = beasts[i];
             if(beast.GetIsCompleteExtend())
             {
-                break;
+                continue;
             }
 
-            Vector2 new_pos = new Vector2();
-            while (true)
+            if (CheckAroundExtensible((int)beast.GetCurrentPos().x, (int)beast.GetCurrentPos().y))
             {
-                Vector2 direction_vector = Utility.ConvertToDirectionVector(Utility.GetRandomDirectionType());
-                new_pos = beast.GetCurrentPos() + direction_vector;
-                if (CheckExtensible((int)new_pos.x, (int)new_pos.y))
-                {
-                    break;
-                }
+                Vector2 new_pos = GetRandomExtensiblePos(beast.GetCurrentPos());
+                ExtendOneStep(beast, (int)new_pos.x, (int)new_pos.y);
             }
-
-            ExtendOneStep(beast, (int)new_pos.x, (int)new_pos.y);
+            else
+            {
+                // 行き場が無い場合は終了
+                beast.ForceCompleteExtend();
+            }
         }
     }
 
@@ -242,5 +286,23 @@ public class GameMain : MonoBehaviour {
 
     void ExtendLegend()
     {
+        while(true)
+        {
+            ExtendLegendOneStep();
+
+            if (legend.GetIsCompleteExtend())
+            {
+                break;
+            }
+        }
+    }
+
+    public void NotifyOpen(Tile tile)
+    {
+        Vector2 indexes = tile.GetIndexes();
+
+        // 周囲の動物をチェック
+
+        // 気配効果を付与
     }
 }

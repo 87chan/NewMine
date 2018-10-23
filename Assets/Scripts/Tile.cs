@@ -5,7 +5,12 @@ using UnityEngine;
 public class Tile : MonoBehaviour {
 
     TileType tile_type = TileType.None;
+    Vector2 indexes;
     bool is_open = false;
+
+    public Vector2 GetIndexes() { return indexes; }
+
+    public void SetIndexes(int x, int y) { indexes = new Vector2(x, y); }
 
     public bool IsEmptyObject() { return (tile_type == TileType.None); }
 
@@ -110,6 +115,9 @@ public class Tile : MonoBehaviour {
                     break;
 
             }
+
+            // 通知
+            game_main.NotifyOpen(this);
         }
     }
 }

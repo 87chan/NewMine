@@ -38,6 +38,12 @@ public class Animal : MonoBehaviour {
         }
     }
 
+    public void ForceCompleteExtend()
+    {
+        left_extend_num = 0;
+        is_complete_extend = true;
+    }
+
     // Use this for initialization
     void Start () {
 		
