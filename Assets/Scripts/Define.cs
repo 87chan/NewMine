@@ -8,6 +8,7 @@ public enum TileType
     Legend,
     Beast,
     Grass,
+    Warning,
     Footprint_U,
     Footprint_UR,
     Footprint_R,

@@ -14,6 +14,7 @@ public class GameMain : MonoBehaviour {
     public Sprite sprite_legend;
     public Sprite sprite_beast;
     public Sprite sprite_grass;
+    public Sprite sprite_warning;
     public Sprite sprite_footprint_u;
     public Sprite sprite_footprint_ur;
     public Sprite sprite_footprint_r;
