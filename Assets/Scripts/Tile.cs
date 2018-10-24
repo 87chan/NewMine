@@ -14,6 +14,12 @@ public class Tile : MonoBehaviour {
 
     public bool IsEmptyObject() { return (tile_type == TileType.None); }
 
+    public bool IsExistAnimal()
+    {
+        return (tile_type == TileType.Legend
+            || tile_type == TileType.Beast);
+    }
+
     // Use this for initialization
     void Start ()
     {
@@ -91,6 +97,14 @@ public class Tile : MonoBehaviour {
         sprite.sprite = new_sprite;
     }
 
+    public void EnableWarning()
+    {
+        GameMain game_main = GameObject.Find("GameMain").GetComponent<GameMain>();
+        SpriteRenderer sprite = transform.FindChild("Warning").GetComponent<SpriteRenderer>();
+
+        sprite.sprite = game_main.sprite_warning;
+    }
+
     public void OnClick()
     {
         GameMain game_main = GameObject.Find("GameMain").GetComponent<GameMain>();
@@ -117,7 +131,11 @@ public class Tile : MonoBehaviour {
             }
 
             // 通知
-            game_main.NotifyOpen(this);
+            if (!game_main.is_game_over
+                && !game_main.is_game_clear)
+            {
+                game_main.NotifyOpen(this);
+            }
         }
     }
 }

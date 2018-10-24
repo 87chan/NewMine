@@ -67,6 +67,37 @@ public class GameMain : MonoBehaviour {
     {
     }
 
+    int GetAroundAnimalCount(int x, int y)
+    {
+        int count = 0;
+        for (int i = 0; i < 8; ++i)
+        {
+            Vector2 pos = new Vector2(x, y);
+            pos += Utility.ConvertToDirectionVector((DirectionType)(i + (int)DirectionType.U));
+            if (CheckAnimal((int)pos.x, (int)pos.y))
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    bool CheckAnimal(int x, int y)
+    {
+        // 範囲以内で動物のいる場所
+        if ((0 <= x && x < width)
+            && (0 <= y && y < height))
+        {
+            if (tiles[x, y].IsExistAnimal())
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     bool CheckAroundExtensible(int x, int y)
     {
         for (int i = 0; i < 8; ++i)
@@ -303,7 +334,12 @@ public class GameMain : MonoBehaviour {
         Vector2 indexes = tile.GetIndexes();
 
         // 周囲の動物をチェック
+        int count = GetAroundAnimalCount((int)indexes.x, (int)indexes.y);
 
         // 気配効果を付与
+        if(count > 0)
+        {
+            tile.EnableWarning();
+        }
     }
 }
